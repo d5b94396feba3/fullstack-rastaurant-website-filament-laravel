@@ -7,7 +7,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
-// 1. Root URL serves index.blade.php with full categories and settings
+// 1. Terminal-Free Setup Route
+Route::get('/system-setup-run', function () {
+    try {
+        Artisan::call('migrate --force');
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('route:clear');
+
+        if (! file_exists(public_path('storage'))) {
+            app('files')->link(storage_path('app/public'), public_path('storage'));
+        }
+
+        return 'System setup executed successfully!';
+    } catch (\Exception $e) {
+        return 'Setup Error: ' . $e->getMessage();
+    }
+});
+
+// 2. Main Site Homepage Route
 Route::get('/', function () {
     $categories = Category::with(['menuItems' => function ($query) {
         $query->where('is_available', true);
@@ -18,17 +36,7 @@ Route::get('/', function () {
     return view('index', compact('categories', 'settings'));
 });
 
-// 2. Checkout Route
-Route::post('/checkout', function (Request $request) {
-    return back()->with('success', 'Order received!');
-})->name('checkout');
-
-// 3. Reservation Route
-Route::post('/reserve', function (Request $request) {
-    return back()->with('success', 'Reservation request received!');
-})->name('reservations.store');
-
-// 4. Special explicit static-like slug routes (Must come BEFORE /{slug})
+// 3. Alternate Home Route
 Route::get('/home', function () {
     $categories = Category::with(['menuItems' => function ($query) {
         $query->where('is_available', true);
@@ -39,23 +47,20 @@ Route::get('/home', function () {
     return view('index', compact('categories', 'settings'));
 });
 
-// 5. General Dynamic Database CMS Pages Route (/about, /contact, etc.)
+// 4. Checkout Route
+Route::post('/checkout', function (Request $request) {
+    return back()->with('success', 'Order received!');
+})->name('checkout');
+
+// 5. Reservation Route
+Route::post('/reserve', function (Request $request) {
+    return back()->with('success', 'Reservation request received!');
+})->name('reservations.store');
+
+// 6. CMS Dynamic Pages Catch-All Route (Must remain LAST)
 Route::get('/{slug}', function ($slug) {
     $page = Page::where('slug', $slug)->firstOrFail();
     $settings = Setting::pluck('value', 'key')->toArray();
 
     return view('page', compact('page', 'settings'));
-});
-
-// 6. Terminal-Free Setup Route for Client Deployment
-Route::get('/system-setup-run', function () {
-    Artisan::call('migrate --force');
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-
-    if (! file_exists(public_path('storage'))) {
-        app('files')->link(storage_path('app/public'), public_path('storage'));
-    }
-
-    return 'System migration, cache clear, and storage symlink executed successfully!';
 });

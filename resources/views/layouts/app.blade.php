@@ -17,7 +17,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <script defer src="{{ asset('js/custom.js') }}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -41,19 +42,6 @@
         }
     </script>
 
-    <style>
-        /* Scroll Reveal Animation Styles */
-        .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
-        }
-        .reveal-on-scroll.is-revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
 </head>
 <body class="bg-brand-lightBg text-slate-800 font-sans antialiased selection:bg-brand-orange selection:text-white" 
       x-data="{ 
@@ -285,28 +273,5 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-revealed');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('section').forEach(section => {
-                section.classList.add('reveal-on-scroll');
-                observer.observe(section);
-            });
-        });
-    </script>
 </body>
 </html>
