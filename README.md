@@ -1,58 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Flavor Harbor — Restaurant Website (Laravel + Filament)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-stack restaurant website for **FLAVOR HARBOR**: a public-facing dining site with menu browsing, cart checkout, and table reservations, plus a Filament admin panel for kitchen menu and CMS content.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Layer | Technology |
+| --- | --- |
+| Backend | [Laravel](https://laravel.com) 13 (PHP 8.3+) |
+| Admin | [Filament](https://filamentphp.com) 3 panel at `/admin` |
+| Frontend | Blade, Alpine.js, [Vite](https://vitejs.dev) 8, [Tailwind CSS](https://tailwindcss.com) 4 |
+| Database | MySQL (configurable via `.env`) |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Laravel
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Laravel powers routing, Eloquent models, migrations, authentication for the admin panel, file storage for menu images, and the public site views. Core domain models:
 
-## Learning Laravel
+- **Category** — menu sections (active/inactive)
+- **MenuItem** — dishes with price, image, description, availability
+- **Page** — CMS pages with slug, rich content, and SEO fields
+- **Setting** — key/value site configuration (branding, hero, contact, social links)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Filament
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Filament provides the **Kitchen Ops** admin UI (`FLAVOR HARBOR | Kitchen Ops`) at `/admin` with:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- **Kitchen Menu**
+  - Categories (name, slug, active status)
+  - Menu items (category, price, image upload, availability)
+- **System Configuration**
+  - CMS pages (rich editor + SEO: meta title, description, OG image)
+  - Site settings (logo, hero, contact, social URLs, and related keys)
+- **Dashboard widget** — totals for menu items, categories, and CMS pages
 
-## Agentic Development
+Admin access uses Filament’s built-in login and Laravel’s `User` model.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Features
+
+**Public site**
+
+- Dynamic homepage driven by settings and active menu categories
+- Menu listing with available items only
+- Client-side cart and checkout form (`POST /checkout`)
+- Reservation request form (`POST /reserve`)
+- Dynamic CMS pages via slug (`/{slug}`)
+- Branding, hours, and contact info from settings
+
+**Admin (`/admin`)**
+
+- CRUD for categories, menu items, pages, and settings
+- Image uploads for menu items and SEO assets
+- Orange-themed Filament panel branded for restaurant operations
+
+## Requirements
+
+- PHP 8.3+
+- Composer
+- Node.js & npm
+- MySQL (or another DB supported by Laravel)
+
+## Installation
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/d5b94396feba3/fullstack-rastaurant-website-filament-laravel.git
+cd fullstack-rastaurant-website-filament-laravel
 
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configure the database in `.env`:
 
-## Contributing
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Then migrate, link storage, and build assets:
 
-## Code of Conduct
+```bash
+php artisan migrate
+php artisan storage:link
+npm install
+npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Optional sample restaurant data (categories, menu items, pages, settings):
 
-## Security Vulnerabilities
+```bash
+php artisan db:seed --class=RestaurantSeeder
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Create an admin user (Filament login), for example:
+
+```bash
+php artisan make:filament-user
+```
+
+Or seed the default test user from `DatabaseSeeder` (`test@example.com`) and set a known password as needed.
+
+### Terminal-free setup (optional)
+
+With the app already configured and reachable, visiting `/system-setup-run` runs migrations, clears caches, and creates the public storage symlink. Prefer the Artisan commands above in local development.
+
+## Running locally
+
+```bash
+php artisan serve
+```
+
+Or the Composer dev script (if configured for concurrent Vite + server):
+
+```bash
+composer run dev
+```
+
+| URL | Purpose |
+| --- | --- |
+| `http://localhost:8000` | Public restaurant site |
+| `http://localhost:8000/admin` | Filament admin panel |
+| `http://localhost:8000/home` | Alternate home route |
+| `http://localhost:8000/{slug}` | CMS page (e.g. `/our-story`) |
+
+## Project structure (high level)
+
+```
+app/
+  Filament/Resources/   # Category, MenuItem, Page, Setting resources
+  Filament/Widgets/     # Restaurant stats overview
+  Models/               # Eloquent models
+  Providers/Filament/   # Admin panel provider (path, brand, colors)
+resources/views/        # Public Blade templates (index, layout, CMS page)
+routes/web.php          # Public routes + setup helper
+database/migrations/    # users, categories, menu_items, pages, settings
+database/seeders/       # RestaurantSeeder, SettingSeeder
+```
+
+## Useful Artisan commands
+
+```bash
+php artisan migrate
+php artisan db:seed --class=RestaurantSeeder
+php artisan make:filament-user
+php artisan storage:link
+php artisan filament:upgrade
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced under the [MIT license](LICENSE).
+
+Laravel is a trademark of Laravel Holdings Inc. Filament is a product of Filament. See their respective documentation for framework details:
+
+- [Laravel docs](https://laravel.com/docs)
+- [Filament docs](https://filamentphp.com/docs)
